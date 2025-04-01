@@ -1,7 +1,6 @@
 package alias
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -53,15 +52,21 @@ func executeAliasSet(args *model.CommandArgs, fields []string, client *pluginapi
 	}
 
 	storeKey := aliasKeyPrefix + args.UserId
-	var aliases map[string]string
-	_ = client.KV.GetJSON(storeKey, &aliases)
-	if aliases == nil {
-		aliases = make(map[string]string)
+
+	aliases := map[string]string{}
+	appErr := client.KV.Get(storeKey, &aliases)
+	if appErr != nil {
+		return &model.CommandResponse{
+			ResponseType: model.CommandResponseTypeEphemeral,
+			Text:         "Failed to read alias store.",
+		}, nil
 	}
 
+	// Устанавливаем/обновляем alias
 	aliases[targetUser.Id] = alias
-	err = client.KV.SetJSON(storeKey, aliases)
-	if err != nil {
+
+	ok, appErr := client.KV.Set(storeKey, aliases)
+	if !ok || appErr != nil {
 		return &model.CommandResponse{
 			ResponseType: model.CommandResponseTypeEphemeral,
 			Text:         "Failed to store alias.",
