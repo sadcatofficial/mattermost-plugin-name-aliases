@@ -1,17 +1,35 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import type {Store, Action} from 'redux';
-
-import type {GlobalState} from '@mattermost/types/store';
+import {injectSidebarAliases} from './utils';
 
 import manifest from '@/manifest';
-import type {PluginRegistry} from '@/types/mattermost-webapp';
+
+// Тип для карты псевдонимов
+type Aliases = Record<string, string>;
 
 export default class Plugin {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-    public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
-        // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
+    private aliases: Aliases = {};
+
+    public async initialize() {
+        // Загружаем псевдонимы текущего пользователя с backend
+        try {
+            const response = await fetch(`/plugins/${manifest.id}/api/v1/aliases`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (response.ok) {
+                this.aliases = await response.json();
+            }
+        } catch (err) {
+            // console.error('Alias plugin error:', err);
+        }
+
+        if (Object.keys(this.aliases).length > 0) {
+            injectSidebarAliases(this.aliases);
+        }
     }
 }
 
@@ -22,3 +40,4 @@ declare global {
 }
 
 window.registerPlugin(manifest.id, new Plugin());
+
