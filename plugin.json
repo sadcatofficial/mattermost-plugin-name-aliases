@@ -1,6 +1,6 @@
 {
-    "id": "com.mattermost.plugin-starter-template",
-    "name": "Plugin Starter Template",
+    "id": "com.mattermost.plugin-name-aliases",
+    "name": "Name Aliases Plugin",
     "description": "This plugin serves as a starting point for writing a Mattermost plugin.",
     "homepage_url": "https://github.com/mattermost/mattermost-plugin-starter-template",
     "support_url": "https://github.com/mattermost/mattermost-plugin-starter-template/issues",
