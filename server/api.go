@@ -17,7 +17,7 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
 
-	apiRouter.HandleFunc("/hello", p.HelloWorld).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/aliases", p.GetAliases).Methods(http.MethodGet)
 
 	router.ServeHTTP(w, r)
 }
@@ -34,9 +34,22 @@ func (p *Plugin) MattermostAuthorizationRequired(next http.Handler) http.Handler
 	})
 }
 
-func (p *Plugin) HelloWorld(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("Hello, world!")); err != nil {
-		p.API.LogError("Failed to write response", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func (p *Plugin) GetAliases(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("Mattermost-User-ID")
+	if userID == "" {
+		http.Error(w, "Not authorized", http.StatusUnauthorized)
+		return
+	}
+
+	storeKey := "alias_store_" + userID
+	var aliases map[string]string
+	_ = p.client.KV.Get(storeKey, &aliases)
+	if aliases == nil {
+		aliases = map[string]string{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(aliases); err != nil {
+		http.Error(w, "Failed to encode alias list", http.StatusInternalServerError)
 	}
 }
