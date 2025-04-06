@@ -1,18 +1,19 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {injectSidebarAliases} from './utils';
+import React from 'react';
+
+import AliasRoot from './AliasRoot';
+import type {PluginRegistry} from './types/mattermost-webapp';
 
 import manifest from '@/manifest';
 
-// Тип для карты псевдонимов
 type Aliases = Record<string, string>;
 
 export default class Plugin {
     private aliases: Aliases = {};
 
-    public async initialize() {
-        // Загружаем псевдонимы текущего пользователя с backend
+    public async initialize(registry: PluginRegistry) {
         try {
             const response = await fetch(`/plugins/${manifest.id}/api/v1/aliases`, {
                 headers: {
@@ -27,9 +28,10 @@ export default class Plugin {
             // console.error('Alias plugin error:', err);
         }
 
-        if (Object.keys(this.aliases).length > 0) {
-            injectSidebarAliases(this.aliases);
-        }
+        registry.registerRootComponent(() => <AliasRoot aliases={this.aliases}/>);
+        registry.registerWebSocketEventHandler('alias_update', () => {
+            window.postMessage({type: 'alias_update'}, '*');
+        });
     }
 }
 
