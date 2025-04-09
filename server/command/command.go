@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mattermost/mattermost/server/public/model"
+	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 
 	"github.com/sadcatofficial/mattermost-plugin-name-aliases/server/command/alias"
@@ -12,6 +13,7 @@ import (
 
 type Handler struct {
 	client *pluginapi.Client
+	api    plugin.API
 }
 
 type Command interface {
@@ -21,7 +23,7 @@ type Command interface {
 const aliasCommandTrigger = "alias"
 
 // Register all your slash commands in the NewCommandHandler function.
-func NewCommandHandler(client *pluginapi.Client) Command {
+func NewCommandHandler(client *pluginapi.Client, api plugin.API) Command {
 	err := client.SlashCommand.Register(&model.Command{
 		Trigger:          aliasCommandTrigger,
 		AutoComplete:     true,
@@ -34,6 +36,7 @@ func NewCommandHandler(client *pluginapi.Client) Command {
 	}
 	return &Handler{
 		client: client,
+		api:    api,
 	}
 }
 
@@ -43,7 +46,7 @@ func (c *Handler) Handle(args *model.CommandArgs) (*model.CommandResponse, error
 
 	switch trigger {
 	case aliasCommandTrigger:
-		return alias.ExecuteAliasCommand(args, c.client)
+		return alias.ExecuteAliasCommand(args, c.client, c.api)
 	default:
 		return &model.CommandResponse{
 			ResponseType: model.CommandResponseTypeEphemeral,

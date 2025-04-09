@@ -29,7 +29,7 @@ export default class Plugin {
         }
 
         registry.registerRootComponent(() => <AliasRoot aliases={this.aliases}/>);
-        registry.registerWebSocketEventHandler('alias_update', () => {
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_alias_update`, () => {
             window.postMessage({type: 'alias_update'}, '*');
         });
     }

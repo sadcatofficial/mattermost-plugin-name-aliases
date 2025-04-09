@@ -44,7 +44,7 @@ func (p *Plugin) OnActivate() error {
 
 	p.kvstore = kvstore.NewKVStore(p.client)
 
-	p.commandClient = command.NewCommandHandler(p.client)
+	p.commandClient = command.NewCommandHandler(p.client, p.API)
 
 	job, err := cluster.Schedule(
 		p.API,
