@@ -27,9 +27,9 @@ func NewCommandHandler(client *pluginapi.Client, api plugin.API) Command {
 	err := client.SlashCommand.Register(&model.Command{
 		Trigger:          aliasCommandTrigger,
 		AutoComplete:     true,
-		AutoCompleteDesc: "Set a display name alias for a user",
-		AutoCompleteHint: "set @username \"Alias\"",
-		AutocompleteData: model.NewAutocompleteData(aliasCommandTrigger, "set @username \"Alias\"", "Set alias"),
+		AutoCompleteDesc: "Manage display name aliases for users",
+		AutoCompleteHint: "[set|remove|list]",
+		AutocompleteData: buildAliasAutocompleteData(),
 	})
 	if err != nil {
 		client.Log.Error("Failed to register command", "error", err)
@@ -38,6 +38,20 @@ func NewCommandHandler(client *pluginapi.Client, api plugin.API) Command {
 		client: client,
 		api:    api,
 	}
+}
+
+func buildAliasAutocompleteData() *model.AutocompleteData {
+	root := model.NewAutocompleteData(aliasCommandTrigger, "[set|remove|list]", "Manage your display name aliases")
+
+	set := model.NewAutocompleteData("set", "@username \"Alias\"", "Set a new alias for a user")
+	remove := model.NewAutocompleteData("remove", "@username", "Remove an alias for a user")
+	list := model.NewAutocompleteData("list", "", "List all your aliases")
+
+	root.AddCommand(set)
+	root.AddCommand(remove)
+	root.AddCommand(list)
+
+	return root
 }
 
 // ExecuteCommand hook calls this method to execute the commands that were registered in the NewCommandHandler function.
