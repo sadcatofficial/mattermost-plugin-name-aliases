@@ -1,9 +1,10 @@
 {
     "id": "com.mattermost.plugin-name-aliases",
     "name": "Name Aliases Plugin",
-    "description": "This plugin serves as a starting point for writing a Mattermost plugin.",
-    "homepage_url": "https://github.com/mattermost/mattermost-plugin-starter-template",
-    "support_url": "https://github.com/mattermost/mattermost-plugin-starter-template/issues",
+    "version": "1.0.0",
+    "description": "Name aliases plgin for mattermost",
+    "homepage_url": "https://github.com/sadcatofficial/mattermost-plugin-name-aliases",
+    "support_url": "https://github.com/sadcatofficial/mattermost-plugin-name-aliases/issues",
     "icon_path": "assets/starter-template-icon.svg",
     "min_server_version": "6.2.1",
     "server": {
